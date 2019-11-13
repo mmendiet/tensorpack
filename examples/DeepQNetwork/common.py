@@ -37,6 +37,72 @@ def play_one_episode(env, func, render=False):
         if isOver:
             return sum_r
 
+def play_my_episode(env, func, filePath, traj, render=False):
+    def predict(s):
+        """
+        Map from observation to action, with 0.01 greedy.
+        """
+        s = np.expand_dims(s, 0)  # batch
+        act = func(s)[0][0].argmax()
+        if random.random() < 0.01:
+            spc = env.action_space
+            act = spc.sample()
+        return act
+    import torch
+    from collections import defaultdict
+    import pickle
+    partition = defaultdict(list)
+    labels = defaultdict(list)
+    train_list = []
+    validation_list = []
+    fileName = filePath.split('/')[1]
+    saveDir = "/1TB/Datasets/Atari/data/data_traj/"
+    dictDir = "/1TB/Datasets/Atari/data/data_dict/"
+    steps = 0
+    while steps < traj:#1728000:
+        ob = env.reset()
+        ep_step = 0
+        print(steps)
+        while (ep_step < 1000) and (ep_step < traj):
+            act = predict(ob)
+
+            action_image = np.full((84,84,1), float(act))
+            curr_state_rsa = np.concatenate((ob[:,:,:,0],ob[:,:,:,1],ob[:,:,:,2],ob[:,:,:,3], action_image), axis=2)
+
+            ob, r, isOver, info = env.step(act)
+
+            reward_image = np.full((84,84,1), float(r))
+            next_frame_r = np.concatenate((ob[:,:,:,3], reward_image), axis=2)
+
+            input_tensor = torch.from_numpy(curr_state_rsa).float()
+            output_tensor = torch.from_numpy(next_frame_r).float()
+
+            ID = fileName.split('.')[0] + '_' + str(steps)
+            np.savez_compressed(saveDir+str(ID), input_tensor)
+            outkey = str(ID)+"_out"
+            np.savez_compressed(saveDir+outkey, output_tensor)
+            #torch.save(input_tensor, saveDir+str(ID)+".pt")
+            if ((steps-8)%10==0) or ((steps-9)%10==0):
+                validation_list.append(ID)
+            else: #80000000  8000000
+                train_list.append(ID)
+            labels[ID] = outkey
+
+            steps += 1
+            if isOver:
+                print(steps)
+                break
+            ep_step += 1
+        partition['train'] = train_list
+        partition['validation'] = validation_list
+        fp = open(dictDir+"partition_"+fileName,"wb")
+        pickle.dump(partition,fp)
+        fp.close()
+
+        fl = open(dictDir+"labels_"+fileName,"wb")
+        pickle.dump(labels,fl)
+        fl.close()
+
 
 def play_n_episodes(player, predfunc, nr, render=False):
     logger.info("Start Playing ... ")

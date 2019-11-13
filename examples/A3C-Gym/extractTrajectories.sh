@@ -1,0 +1,11 @@
+python3 train-atari.py --env Asterix-v0 --load models/Asterix-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env Atlantis-v0 --load models/Atlantis-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env Breakout-v0 --load models/Breakout-v0.npz --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env DemonAttack-v0 --load models/DemonAttack-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env Gopher-v0 --load models/Gopher-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env IceHockey-v0 --load models/IceHockey-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env Phoenix-v0 --load models/Phoenix-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env RoadRunner-v0 --load models/RoadRunner-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env Robotank-v0 --load models/Robotank-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env UpNDown-v0 --load models/UpNDown-v0.tfmodel --task my_play --traj 1728000 --gpu 1
+python3 train-atari.py --env VideoPinball-v0 --load models/VideoPinball-v0.tfmodel --task my_play --traj 1728000 --gpu 1

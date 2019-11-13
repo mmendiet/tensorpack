@@ -9,13 +9,11 @@ import gym
 import multiprocessing as mp
 import numpy as np
 import os
+import six
 import sys
 import uuid
 import tensorflow as tf
 from six.moves import queue
-from concurrent import futures
-CancelledError = futures.CancelledError
-
 
 from tensorpack import *
 from tensorpack.tfutils.gradproc import MapGradient, SummaryGradient
@@ -24,8 +22,14 @@ from tensorpack.utils.gpu import get_num_gpu
 from tensorpack.utils.serialize import dumps
 
 from atari_wrapper import FireResetEnv, FrameStack, LimitLength, MapState
-from common import Evaluator, eval_model_multithread, play_n_episodes
+from common import Evaluator, eval_model_multithread, play_n_episodes, play_my_episode
 from simulator import SimulatorMaster, SimulatorProcess, TransitionExperience
+
+if six.PY3:
+    from concurrent import futures
+    CancelledError = futures.CancelledError
+else:
+    CancelledError = Exception
 
 IMAGE_SIZE = (84, 84)
 FRAME_HISTORY = 4
@@ -274,9 +278,10 @@ if __name__ == '__main__':
     parser.add_argument('--load', help='load model')
     parser.add_argument('--env', help='env', required=True)
     parser.add_argument('--task', help='task to perform',
-                        choices=['play', 'eval', 'train', 'dump_video'], default='train')
+                        choices=['play', 'eval', 'train', 'dump_video', 'my_play'], default='train')
     parser.add_argument('--output', help='output directory for submission', default='output_dir')
     parser.add_argument('--episode', help='number of episode to eval', default=100, type=int)
+    parser.add_argument('--traj', help='number of episode to eval', default=1728000, type=int)
     args = parser.parse_args()
 
     ENV_NAME = args.env
@@ -302,5 +307,8 @@ if __name__ == '__main__':
             play_n_episodes(
                 get_player(train=False, dumpdir=args.output),
                 pred, args.episode)
+        elif args.task == 'my_play':
+            play_my_episode(get_player(train=False), pred, args.load,
+                            args.traj, render=False)
     else:
         train()
