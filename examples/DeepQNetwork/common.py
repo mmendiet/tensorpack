@@ -56,14 +56,14 @@ def play_my_episode(env, func, filePath, traj, render=False):
     train_list = []
     validation_list = []
     fileName = filePath.split('/')[1]
-    saveDir = "/1TB/Datasets/Atari/data/data_traj/"
-    dictDir = "/1TB/Datasets/Atari/data/data_dict/"
+    saveDir = "/1TB/Datasets/Atari/data3/data_traj/"
+    dictDir = "/1TB/Datasets/Atari/data3/data_dict/"
     steps = 0
     while steps < traj:#1728000:
         ob = env.reset()
-        ep_step = 0
+        ep_step = 1
         print(steps)
-        while (ep_step < 1000) and (ep_step < traj):
+        while (ep_step <= 4000) and (steps < traj):
             act = predict(ob)
 
             action_image = np.full((84,84,1), float(act))
@@ -77,18 +77,19 @@ def play_my_episode(env, func, filePath, traj, render=False):
             input_tensor = torch.from_numpy(curr_state_rsa).float()
             output_tensor = torch.from_numpy(next_frame_r).float()
 
-            ID = fileName.split('.')[0] + '_' + str(steps)
-            np.savez_compressed(saveDir+str(ID), input_tensor)
-            outkey = str(ID)+"_out"
-            np.savez_compressed(saveDir+outkey, output_tensor)
-            #torch.save(input_tensor, saveDir+str(ID)+".pt")
-            if ((steps-8)%10==0) or ((steps-9)%10==0):
-                validation_list.append(ID)
-            else: #80000000  8000000
-                train_list.append(ID)
-            labels[ID] = outkey
+            if(ep_step%4==0):
+                ID = fileName.split('.')[0] + '_' + str(steps)
+                np.savez_compressed(saveDir+str(ID), input_tensor)
+                outkey = str(ID)+"_out"
+                np.savez_compressed(saveDir+outkey, output_tensor)
+                #torch.save(input_tensor, saveDir+str(ID)+".pt")
+                if ((steps-8)%10==0) or ((steps-9)%10==0):
+                    validation_list.append(ID)
+                else: #80000000  8000000
+                    train_list.append(ID)
+                labels[ID] = outkey
 
-            steps += 1
+                steps += 1
             if isOver:
                 print(steps)
                 break
